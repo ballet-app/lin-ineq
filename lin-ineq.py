@@ -9,7 +9,7 @@ y = np.linspace(-2, 4, 400)
 fig, ax = plt.subplots(figsize=(6, 6))
 
 # Zielony obszar: x >= 0
-ax.fill_betweenx(y, 0, 4, color='green', alpha=0.5, label='$x \\geq 0$')
+ax.fill_betweenx(y, 0, 4, color='yellow', alpha=0.5, label='$x \\geq 0$')
 
 # Czerwony obszar: y >= 0
 ax.fill_between(x, 0, 4, color='red', alpha=0.5, label='$y \\geq 0$')
