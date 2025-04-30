@@ -1,12 +1,12 @@
+import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Zakres osi
+# Ustawienia wykresu
 x = np.linspace(-2, 4, 400)
 y = np.linspace(-2, 4, 400)
-X, Y = np.meshgrid(x, y)
 
-fig, ax = plt.subplots(figsize=(6,6))
+fig, ax = plt.subplots(figsize=(6, 6))
 
 # Zielony obszar: x >= 0
 ax.fill_betweenx(y, 0, 4, color='green', alpha=0.5, label='$x \\geq 0$')
@@ -25,6 +25,7 @@ ax.set_xlabel('$x$')
 ax.set_ylabel('$y$')
 ax.set_title('Interpretacja układu nierówności $x \\geq 0$, $y \\geq 0$')
 ax.legend(loc='upper right')
+ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
-plt.grid(True, which='both', linestyle='--', linewidth=0.5)
-plt.show()
+# Wyświetlenie wykresu w aplikacji Streamlit
+st.pyplot(fig)
