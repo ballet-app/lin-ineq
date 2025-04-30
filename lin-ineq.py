@@ -6,22 +6,23 @@ import re
 st.title("Wizualizacja dwóch nierówności liniowych")
 
 # Funkcja pomocnicza do parsowania nierówności
-def parse_inequality(ineq_str):
-    # Usuwamy spacje
+import re
+
+def improved_parse_inequality(ineq_str):
     ineq_str = ineq_str.replace(' ', '')
-    # Wzorzec: ax+by>=c, ax+by<=c, ax+by>c, ax+by<c
-    pattern = r'([+-]?\d*\.?\d*)x([+-]\d*\.?\d*)y([<>]=?|>=|<=)([+-]?\d*\.?\d*)'
+    # Wzorzec z opcjonalnym wyrazem y
+    pattern = r'([+-]?\d*\.?\d*)x(?:([+-]?\d*\.?\d*)y)?([<>]=?|>=|<=)([+-]?\d*\.?\d*)'
     match = re.match(pattern, ineq_str)
     if match:
         a = match.group(1)
-        b = match.group(2)
+        b = match.group(2) if match.group(2) is not None else '0'
         op = match.group(3)
         c = match.group(4)
         a = float(a) if a not in ['', '+', '-'] else float(a+'1') if a else 1.0
         b = float(b) if b not in ['', '+', '-'] else float(b+'1') if b else 1.0
         c = float(c)
         return a, b, op, c
-    # Specjalne przypadki: x>=c, x>c, y<=c, y<c itd.
+    # Specjalne przypadki: x>=c, y<=c itd.
     pattern_x = r'x([<>]=?|>=|<=)([+-]?\d*\.?\d*)'
     pattern_y = r'y([<>]=?|>=|<=)([+-]?\d*\.?\d*)'
     match_x = re.match(pattern_x, ineq_str)
@@ -34,14 +35,15 @@ def parse_inequality(ineq_str):
         return a, b, op, c
     return None
 
+
 # Pola tekstowe dla użytkownika
 default_ineq1 = "x>=0"
 default_ineq2 = "y>0"
 ineq1 = st.text_input("Podaj pierwszą nierówność liniową (np. 2x+3y<=6, x>0):", value=default_ineq1)
 ineq2 = st.text_input("Podaj drugą nierówność liniową (np. -x+y>=2, y<3):", value=default_ineq2)
 
-parsed1 = parse_inequality(ineq1)
-parsed2 = parse_inequality(ineq2)
+parsed1 = improved_parse_inequality(ineq1)
+parsed2 = improved_parse_inequality(ineq2)
 
 if not parsed1 or not parsed2:
     st.error("Nieprawidłowy format nierówności. Użyj np. 2x+3y<=6, x>0, y<=3, x<5 itp.")
