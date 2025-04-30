@@ -69,7 +69,7 @@ else:
                 ax.fill_betweenx(y, -10, c / a, color=color, alpha=0.5, label=label)
             ax.plot(X_line, y, color=color, linewidth=2)
 
-    plot_halfplane(*parsed1, color='green', label=ineq1)
+    plot_halfplane(*parsed1, color='yellow', label=ineq1)
     plot_halfplane(*parsed2, color='red', label=ineq2)
 
     # Osie
