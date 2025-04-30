@@ -64,4 +64,29 @@ else:
                 ax.fill_between(x, Y_line, 10, color=color, alpha=0.5, label=label)
             else:
                 ax.fill_between(x, Y_line, -10, color=color, alpha=0.5, label=label)
-            ax.plot(x, Y
+            ax.plot(x, Y_line, color=color, linewidth=2, linestyle='--' if is_strict else '-')
+        else:
+            # x = c/a
+            X_line = np.full_like(y, c / a)
+            if op in ['>=', '>']:
+                ax.fill_betweenx(y, c / a, 10, color=color, alpha=0.5, label=label)
+            else:
+                ax.fill_betweenx(y, -10, c / a, color=color, alpha=0.5, label=label)
+            ax.plot(X_line, y, color=color, linewidth=2, linestyle='--' if is_strict else '-')
+
+    plot_halfplane(*parsed1, color='green', label=ineq1)
+    plot_halfplane(*parsed2, color='red', label=ineq2)
+
+    # Osie
+    ax.axhline(0, color='black', linewidth=1)
+    ax.axvline(0, color='black', linewidth=1)
+
+    ax.set_xlim(-10, 10)
+    ax.set_ylim(-10, 10)
+    ax.set_xlabel('$x$')
+    ax.set_ylabel('$y$')
+    ax.set_title('Wizualizacja układu nierówności')
+    ax.legend(loc='upper right')
+    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+
+    st.pyplot(fig)
