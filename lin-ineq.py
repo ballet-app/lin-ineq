@@ -9,18 +9,21 @@ st.title("Wizualizacja dwóch nierówności liniowych")
 def parse_inequality(ineq_str):
     # Usuwamy spacje
     ineq_str = ineq_str.replace(' ', '')
-    # Wzorzec: ax+by>=c lub ax+by<=c
-    pattern = r'([+-]?\d*\.?\d*)x([+-]\d*\.?\d*)y([<>]=)([+-]?\d*\.?\d*)'
+    # Wzorzec: ax+by>=c, ax+by<=c, ax+by>c, ax+by<c
+    pattern = r'([+-]?\d*\.?\d*)x([+-]\d*\.?\d*)y([<>]=?|>=|<=)([+-]?\d*\.?\d*)'
     match = re.match(pattern, ineq_str)
     if match:
-        a = float(match.group(1)) if match.group(1) not in ['', '+', '-'] else float(match.group(1)+'1') if match.group(1) else 1.0
-        b = float(match.group(2)) if match.group(2) not in ['', '+', '-'] else float(match.group(2)+'1') if match.group(2) else 1.0
+        a = match.group(1)
+        b = match.group(2)
         op = match.group(3)
-        c = float(match.group(4))
+        c = match.group(4)
+        a = float(a) if a not in ['', '+', '-'] else float(a+'1') if a else 1.0
+        b = float(b) if b not in ['', '+', '-'] else float(b+'1') if b else 1.0
+        c = float(c)
         return a, b, op, c
-    # Specjalne przypadki: x>=c, y<=c itd.
-    pattern_x = r'x([<>]=)([+-]?\d*\.?\d*)'
-    pattern_y = r'y([<>]=)([+-]?\d*\.?\d*)'
+    # Specjalne przypadki: x>=c, x>c, y<=c, y<c itd.
+    pattern_x = r'x([<>]=?|>=|<=)([+-]?\d*\.?\d*)'
+    pattern_y = r'y([<>]=?|>=|<=)([+-]?\d*\.?\d*)'
     match_x = re.match(pattern_x, ineq_str)
     match_y = re.match(pattern_y, ineq_str)
     if match_x:
@@ -33,15 +36,15 @@ def parse_inequality(ineq_str):
 
 # Pola tekstowe dla użytkownika
 default_ineq1 = "x>=0"
-default_ineq2 = "y>=0"
-ineq1 = st.text_input("Podaj pierwszą nierówność liniową (np. 2x+3y<=6 lub x>=0):", value=default_ineq1)
-ineq2 = st.text_input("Podaj drugą nierówność liniową (np. -x+y>=2 lub y<=3):", value=default_ineq2)
+default_ineq2 = "y>0"
+ineq1 = st.text_input("Podaj pierwszą nierówność liniową (np. 2x+3y<=6, x>0):", value=default_ineq1)
+ineq2 = st.text_input("Podaj drugą nierówność liniową (np. -x+y>=2, y<3):", value=default_ineq2)
 
 parsed1 = parse_inequality(ineq1)
 parsed2 = parse_inequality(ineq2)
 
 if not parsed1 or not parsed2:
-    st.error("Nieprawidłowy format nierówności. Użyj np. 2x+3y<=6, x>=0, y<=3 itp.")
+    st.error("Nieprawidłowy format nierówności. Użyj np. 2x+3y<=6, x>0, y<=3, x<5 itp.")
 else:
     # Zakres wykresu
     x = np.linspace(-10, 10, 400)
@@ -50,38 +53,15 @@ else:
 
     fig, ax = plt.subplots(figsize=(6, 6))
 
-    # Funkcja do rysowania półpłaszczyzny
+    # Funkcja do rysowania półpłaszczyzny i linii pomocniczej
     def plot_halfplane(a, b, op, c, color, label):
+        # Określenie czy nierówność jest ostra
+        is_strict = op in ['<', '>']
         if b != 0:
             # Wyznacz y z równania ax + by = c => y = (c - a*x)/b
             Y_line = (c - a * x) / b
-            if op == '>=':
+            if op in ['>=', '>']:
                 ax.fill_between(x, Y_line, 10, color=color, alpha=0.5, label=label)
             else:
                 ax.fill_between(x, Y_line, -10, color=color, alpha=0.5, label=label)
-            ax.plot(x, Y_line, color=color, linewidth=2)
-        else:
-            # x = c/a
-            X_line = np.full_like(y, c / a)
-            if op == '>=':
-                ax.fill_betweenx(y, c / a, 10, color=color, alpha=0.5, label=label)
-            else:
-                ax.fill_betweenx(y, -10, c / a, color=color, alpha=0.5, label=label)
-            ax.plot(X_line, y, color=color, linewidth=2)
-
-    plot_halfplane(*parsed1, color='yellow', label=ineq1)
-    plot_halfplane(*parsed2, color='red', label=ineq2)
-
-    # Osie
-    ax.axhline(0, color='black', linewidth=1)
-    ax.axvline(0, color='black', linewidth=1)
-
-    ax.set_xlim(-10, 10)
-    ax.set_ylim(-10, 10)
-    ax.set_xlabel('$x$')
-    ax.set_ylabel('$y$')
-    ax.set_title('Wizualizacja układu nierówności')
-    ax.legend(loc='upper right')
-    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-
-    st.pyplot(fig)
+            ax.plot(x, Y
