@@ -10,29 +10,41 @@ import re
 
 def improved_parse_inequality(ineq_str):
     ineq_str = ineq_str.replace(' ', '')
-    # Wzorzec z opcjonalnym wyrazem y
-    pattern = r'([+-]?\d*\.?\d*)x(?:([+-]?\d*\.?\d*)y)?([<>]=?|>=|<=)([+-]?\d*\.?\d*)'
-    match = re.match(pattern, ineq_str)
+    # Pełny wzorzec: ax+by<=c, ax+by>=c, ax+by<c, ax+by>c
+    pattern_full = r'^([+-]?\d*\.?\d*)x([+-]\d*\.?\d*)y([<>]=?|>=|<=)([+-]?\d*\.?\d*)$'
+    match = re.match(pattern_full, ineq_str)
     if match:
         a = match.group(1)
-        b = match.group(2) if match.group(2) is not None else '0'
+        b = match.group(2)
         op = match.group(3)
         c = match.group(4)
         a = float(a) if a not in ['', '+', '-'] else float(a+'1') if a else 1.0
         b = float(b) if b not in ['', '+', '-'] else float(b+'1') if b else 1.0
         c = float(c)
         return a, b, op, c
-    # Specjalne przypadki: x>=c, y<=c itd.
-    pattern_x = r'x([<>]=?|>=|<=)([+-]?\d*\.?\d*)'
-    pattern_y = r'y([<>]=?|>=|<=)([+-]?\d*\.?\d*)'
+
+    # Tylko x: ax<=c, ax>=c, ax<c, ax>c
+    pattern_x = r'^([+-]?\d*\.?\d*)x([<>]=?|>=|<=)([+-]?\d*\.?\d*)$'
     match_x = re.match(pattern_x, ineq_str)
-    match_y = re.match(pattern_y, ineq_str)
     if match_x:
-        a, b, op, c = 1.0, 0.0, match_x.group(1), float(match_x.group(2))
-        return a, b, op, c
+        a = match_x.group(1)
+        op = match_x.group(2)
+        c = match_x.group(3)
+        a = float(a) if a not in ['', '+', '-'] else float(a+'1') if a else 1.0
+        c = float(c)
+        return a, 0.0, op, c
+
+    # Tylko y: by<=c, by>=c, by<c, by>c
+    pattern_y = r'^([+-]?\d*\.?\d*)y([<>]=?|>=|<=)([+-]?\d*\.?\d*)$'
+    match_y = re.match(pattern_y, ineq_str)
     if match_y:
-        a, b, op, c = 0.0, 1.0, match_y.group(1), float(match_y.group(2))
-        return a, b, op, c
+        b = match_y.group(1)
+        op = match_y.group(2)
+        c = match_y.group(3)
+        b = float(b) if b not in ['', '+', '-'] else float(b+'1') if b else 1.0
+        c = float(c)
+        return 0.0, b, op, c
+
     return None
 
 
