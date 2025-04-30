@@ -10,43 +10,39 @@ import re
 
 def improved_parse_inequality(ineq_str):
     ineq_str = ineq_str.replace(' ', '')
-    # Pełny wzorzec: ax+by<=c, ax+by>=c, ax+by<c, ax+by>c
-    pattern_full = r'^([+-]?\d*\.?\d*)x([+-]\d*\.?\d*)y([<>]=?|>=|<=)([+-]?\d*\.?\d*)$'
-    match = re.match(pattern_full, ineq_str)
-    if match:
-        a = match.group(1)
-        b = match.group(2)
-        op = match.group(3)
-        c = match.group(4)
-        a = float(a) if a not in ['', '+', '-'] else float(a+'1') if a else 1.0
-        b = float(b) if b not in ['', '+', '-'] else float(b+'1') if b else 1.0
-        c = float(c)
-        return a, b, op, c
 
-    # Tylko x: ax<=c, ax>=c, ax<c, ax>c
-    pattern_x = r'^([+-]?\d*\.?\d*)x([<>]=?|>=|<=)([+-]?\d*\.?\d*)$'
-    match_x = re.match(pattern_x, ineq_str)
-    if match_x:
-        a = match_x.group(1)
-        op = match_x.group(2)
-        c = match_x.group(3)
-        a = float(a) if a not in ['', '+', '-'] else float(a+'1') if a else 1.0
-        c = float(c)
-        return a, 0.0, op, c
+    # Szukamy operatora nierówności
+    op_match = re.search(r'(<=|>=|<|>)', ineq_str)
+    if not op_match:
+        return None
+    op = op_match.group(0)
+    left, right = ineq_str.split(op, 1)
 
-    # Tylko y: by<=c, by>=c, by<c, by>c
-    pattern_y = r'^([+-]?\d*\.?\d*)y([<>]=?|>=|<=)([+-]?\d*\.?\d*)$'
-    match_y = re.match(pattern_y, ineq_str)
-    if match_y:
-        b = match_y.group(1)
-        op = match_y.group(2)
-        c = match_y.group(3)
-        b = float(b) if b not in ['', '+', '-'] else float(b+'1') if b else 1.0
-        c = float(c)
-        return 0.0, b, op, c
+    # Inicjalizacja współczynników
+    a = 0.0  # x
+    b = 0.0  # y
 
-    return None
+    # Szukamy wyrazów z x i y w lewej stronie
+    for var, coeff in [('x', 'a'), ('y', 'b')]:
+        # znajdź wszystkie wyrazy z daną zmienną
+        var_matches = re.findall(r'([+-]?\d*\.?\d*)'+var, left)
+        if var_matches:
+            val = sum([
+                float(m) if m not in ['', '+', '-'] else float(m+'1') if m else 1.0
+                for m in var_matches
+            ])
+            if var == 'x':
+                a = val
+            else:
+                b = val
 
+    # Stała po prawej stronie
+    try:
+        c = float(right)
+    except ValueError:
+        return None
+
+    return a, b, op, c
 
 # Pola tekstowe dla użytkownika
 default_ineq1 = "x>=0"
